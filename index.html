@@ -21,8 +21,9 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      min-height: 100vh;
+      min-height: 100vh; /* 브라우저 화면 높이 전체 사용 */
       color: #fff;
+      overflow-x: hidden; /* 화살표가 화면 밖으로 나갈 경우 횡스크롤 방지 */
     }
 
     /* 슬라이더 전체 컨테이너 */
@@ -31,7 +32,8 @@
       flex-direction: column;
       align-items: center;
       gap: 15px;
-      padding: 0 4rem; /* 모바일에서 화살표가 화면 밖으로 나가는 것 방지 */
+      width: 100%;
+      padding: 20px;
     }
 
     /* 이미지 상단 인디케이터 (예: 1 / 8) */
@@ -40,9 +42,10 @@
       font-weight: 600;
       letter-spacing: 1px;
       color: #e0e0e0;
+      z-index: 10; /* 이미지보다 위에 표시 */
     }
 
-    /* 슬라이더 영역 */
+    /* 슬라이더 영역 (이미지 박스) */
     .slider-container {
       position: relative;
       display: flex;
@@ -63,7 +66,7 @@
       display: block;
     }
 
-    /* 화살표 버튼 공통 스타일 */
+    /* === 화살표 버튼 배치 수정 (브라우저 화면 기준) === */
     .arrow-btn {
       background: rgba(255, 255, 255, 0.1);
       border: 1px solid rgba(255, 255, 255, 0.2);
@@ -75,38 +78,58 @@
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      position: absolute;
-      top: 50%;
+      position: fixed; /* 브라우저 화면에 고정 */
+      top: 50%; /* 세로 중앙 (100vh 기준) */
       border-radius: 50%;
       transition: background 0.3s ease, transform 0.2s ease;
       user-select: none;
+      z-index: 100; /* 최상단 배치 */
     }
 
     .arrow-btn:hover {
       background: rgba(255, 255, 255, 0.3);
     }
 
-    .arrow-btn:active {
-      transform: translateY(-50%) scale(0.95);
-    }
-
-    /* 이미지 기준 좌우로 1.5rem 띄워서 배치 */
+    /* 좌우 화살표 위치 정교화 (X축 정렬) */
+    /* 이미지 최대 가로폭 360px의 절반(180px) + 여백(1.5rem) 위치에 배치 */
     .left-arrow {
-      left: -1.5rem;
-      transform: translate(-100%, -50%);
+      left: 50%;
+      transform: translate(calc(-180px - 1.5rem - 100%), -50%);
     }
 
     .right-arrow {
-      right: -1.5rem;
-      transform: translate(100%, -50%);
+      right: 50%;
+      transform: translate(calc(180px + 1.5rem + 100%), -50%);
     }
 
-    /* 모바일 반응형 시 버튼 밀림 방지 */
+    /* 버튼 클릭 시 애니메이션 */
     .left-arrow:active {
-      transform: translate(-100%, -50%) scale(0.95);
+      transform: translate(calc(-180px - 1.5rem - 100%), -50%) scale(0.95);
     }
     .right-arrow:active {
-      transform: translate(100%, -50%) scale(0.95);
+      transform: translate(calc(180px + 1.5rem + 100%), -50%) scale(0.95);
+    }
+
+    /* === 모바일 반응형 대응 === */
+    /* 화면 폭이 480px 이하로 작아지면 화살표 위치를 이미지 가로폭에 맞게 조정 */
+    @media (max-width: 480px) {
+      .left-arrow {
+        left: 50%;
+        transform: translate(calc(-50vw - 100%), -50%); /* 이미지 꽉 찼을 때 기준 왼쪽 바깥 */
+        margin-left: -0.5rem; /* 터치 영역 확보를 위한 미세 조정 */
+      }
+      .right-arrow {
+        right: 50%;
+        transform: translate(calc(50vw + 100%), -50%); /* 이미지 꽉 찼을 때 기준 오른쪽 바깥 */
+        margin-right: -0.5rem;
+      }
+      
+      .left-arrow:active {
+        transform: translate(calc(-50vw - 100%), -50%) scale(0.95);
+      }
+      .right-arrow:active {
+        transform: translate(calc(50vw + 100%), -50%) scale(0.95);
+      }
     }
   </style>
 </head>
@@ -116,11 +139,14 @@
     <!-- 상단 갯수 표시 영역 (예: 1 / 8) -->
     <div class="image-counter" id="image-counter">불러오는 중...</div>
 
+    <!-- 브라우저 화면 기준 세로 중앙 고정을 위해 화살표 버튼을 컨테이너 바깥으로 이동 -->
+    <button class="arrow-btn left-arrow" onclick="prevSlide()" aria-label="이전 이미지">&#10094;</button>
+    
     <div class="slider-container">
-      <button class="arrow-btn left-arrow" onclick="prevSlide()">&#10094;</button>
       <img src="" alt="슬라이드 이미지" id="slider-image">
-      <button class="arrow-btn right-arrow" onclick="nextSlide()">&#10095;</button>
     </div>
+
+    <button class="arrow-btn right-arrow" onclick="nextSlide()" aria-label="다음 이미지">&#10095;</button>
   </div>
 
   <script>
